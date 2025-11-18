@@ -2,6 +2,10 @@
 abbrev Matrix α m n := Vector (Vector α n) m
 
 @[noinline]
+def dummy (_ : Matrix Bool m n) (_ : Vector Bool n) : IO (Vector Bool m) :=
+  pure <| Vector.ofFn fun _ => Fin.foldl (n := n) (init := false) fun _ _ => false
+
+@[noinline]
 def mmul1 (a : Matrix Bool m n) (x : Vector Bool n) : IO (Vector Bool m) :=
   pure <| Vector.ofFn fun i => Fin.foldl (n := n) (init := false) fun acc j => acc ^^ a[i][j] && x[j]
 
@@ -41,6 +45,7 @@ def main (args : List String) : IO UInt32 := do
     let (a, g) ← a size g
     let (x, _) ← x size g
 
+    let _  ← timeit "dummy:" <| dummy a x
     let r1 ← timeit "mmul1:" <| mmul1 a x
     let r2 ← timeit "mmul2:" <| mmul2 a x
 
